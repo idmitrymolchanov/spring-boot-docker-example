@@ -1,4 +1,4 @@
-# docker-window10-home
+# docker-windows10-Home
 spring boot app with mysql in two containers
 
 ## Step 1 - install Docker on Windows 10 Home
@@ -7,7 +7,7 @@ spring boot app with mysql in two containers
 Docker Machine - a CLI tool for installing Docker Engine on virtual hosts\
 Docker Engine - runs on top of the Linux Kernel; used for building and running containers\
 Docker Client - a CLI tool for issuing commands to Docker Engine via REST API\
-Docker Compose - a tool for defining and running multi-container applications\
+Docker Compose - a tool for defining and running multi-container applications
 
 ### Initial Setup
 * Install Git Bash 
@@ -34,15 +34,13 @@ $ docker-machine create --driver virtualbox default
 
 Configure which ports are exposed when running Docker containers. To do this, you’ll need to launch Oracle VM VirtualBox from your start menu. Select default VM on the side menu. Next click on Settings > Network > Adapter 1 > Port Forwarding. You should find the ssh forwarding port already set up for you. You can add more like so:
 
-=======
-docker vm ports
+![alt text](https://github.com/idmitrymolchanov/spring-boot-docker-example/blob/for_annotation/img/ports.png "ports")
 
 Allow Docker to mount volumes located on your hard drive. In VirtualBox GUI select default VM and go to Settings > Shared Folders. Add a new one by clicking the plus symbol. Enter the fields like so. If there’s an option called Permanent, enable it.
 
-=======
-docker vm volumes
+To get rid of the invalid settings error as seen in the above screenshot, simply increase Video Memory under the Display tab in the settings option
 
-To get rid of the invalid settings error as seen in the above screenshot, simply increase Video Memory under the Display tab in the settings option\
+![alt text](https://github.com/idmitrymolchanov/spring-boot-docker-example/blob/for_annotation/img/screen_set.png "screen_s")
 
 Start the Linux VM\Give it some time for the boot process to complete. It shouldn’t take more than a minute. You’ll need to do this every time you boot your host OS:
 ```
@@ -67,10 +65,9 @@ You’ll need to set the environment variables every time you start a new Git Ba
 ```
 export DOCKER_TLS_VERIFY="1"
 export DOCKER_HOST="tcp://192.168.99.101:2376"
-export DOCKER_CERT_PATH="C:\Users\Michael Wanyoike\.docker\machine\machines\default"
+export DOCKER_CERT_PATH="C:\***\default"
 export DOCKER_MACHINE_NAME="default"
 export COMPOSE_CONVERT_WINDOWS_PATHS="true"
-IMPORTANT: for the DOCKER_CERT_PATH, you’ll need to change the Linux file path to a Windows path format. Also take note that there’s a chance the IP address assigned might be different from the one you saved every time you start the default VM.
 ```
 
 ### Install Docker Client and Docker Compose
@@ -114,14 +111,16 @@ $ docker run hello-world
 Create the schema-mysql.sql file and specify the initialization scripts-
 ```
 CREATE TABLE IF NOT EXISTS employee (
-  empId VARCHAR(10) NOT NULL,
-  empName VARCHAR(100) NOT NULL
+  id VARCHAR(10) NOT NULL,
+  firstName VARCHAR(100) NOT NULL,
+  lastName VARCHAR(100) NOT NULL,
+  age INT
 );
 ```
 
-```
 In the application.properties file specify the datasource properties
-spring.datasource.url=jdbc:mysql://localhost/bootdb?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false
+```
+spring.datasource.url=jdbc:mysql://localhost/project_db?useUnicode=true&serverTimezone=UTC
 spring.datasource.username=root
 spring.datasource.password=root
 spring.datasource.platform=mysql
@@ -131,83 +130,78 @@ spring.datasource.initialization-mode=always
 Start the Spring Boot Application.
 Open POSTMAN and create a POST request to url - 
 ```
-localhost:8080/insertemployee with employee object to be persisted in DB.
+localhost:8080/insert
 ```
-Spring Boot Postman call
-In the browser use 
+![alt text](https://github.com/idmitrymolchanov/spring-boot-docker-example/blob/for_annotation/img/postman_post.png "Postman POST")
+
+Spring Boot Postman call\
+In the browser or in Postman again use 
 ```
 localhost:8080/employees
 ```
-to fetch the list of employees.
-Spring Boot REST call
+![alt text](https://github.com/idmitrymolchanov/spring-boot-docker-example/blob/for_annotation/img/postman_get.png "Postman GET")
 
-# Deploying Spring Boot + MYSQL to Docker-
-Since are going to create two docker containers which should communicate with each other, we will need to start them on same network. We had seen the Docker Networking details in a previous tutorial. Open the terminal and start the docker
-systemctl start docker
-First lets create a network named employee-mysql
+
+# Deploying Spring Boot + MYSQL to Docker
+
+Firstly create a network named employee-mysql
+```
+start docker
 docker network create employee-mysql
-
-spring boot mysql docker tutorial
-
-mysql docker tutorial
-MYSQL provides an image in dockerhub which we can run as container.
-mysql docker tutorial
-Ad by Valueimpression
-We will use the image provided by dockerhub to run as container. Also we will specify following when running the container
-a. name of the mysql container
-a. What should be the password for MYSQL
-b. We want to create the Database named bootdb.
-c. specify the network employee-mysql on which this container should be created.
-d. start the container in detached mode.
-docker container run --name mysqldb --network employee-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=bootdb -d mysql:8
-
-spring boot mysql docker start container
-Next let us check if container has started correctly using logs command.
-```
-docker container logs -f ae
 ```
 
-spring boot mysql docker container logs
-Using the exec command we can also inspect if the database named bootdb is created successfully.
+Check that you created
 ```
-docker container exec -it ae bash
+docker network ls
 ```
 
-spring boot mysql docker container exec
-Ad by Valueimpression
+Next step: write config data of your db
+```
+docker container run --name mysqldb --network employee-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=project_db -d mysql:5
+```
+
+And start it
+```
+docker container start mysqldb
+```
+
+Using the exec command we can inspect if the database named project_db is created successfully.
+```
+docker container exec -tty [name or id container] mysql -uroot -proot "show databases"
+```
+
 Next we will modify the application.properties in the Spring Boot application to make use of the mysql container name i.e.mysqldb instead of localhost
 ```
-spring.datasource.url=jdbc:mysql://mysqldb/bootdb
+spring.datasource.url=jdbc:mysql://mysqldb/project_db
 spring.datasource.username=root
 spring.datasource.password=root
 spring.datasource.platform=mysql
 spring.datasource.initialization-mode=always
 ```
-The docker file for spring boot project will be as follows-
+
+The docker file for spring boot project will be as follows
 ```
 From openjdk:8
-copy ./target/employee-jdbc-0.0.1-SNAPSHOT.jar employee-jdbc-0.0.1-SNAPSHOT.jar
-CMD ["java","-jar","employee-jdbc-0.0.1-SNAPSHOT.jar"]
+copy ./target/spring-boot-docker-example-1.0-SNAPSHOT.jar spring-boot-docker-example-1.0-SNAPSHOT.jar
+CMD ["java","-jar","spring-boot-docker-example-1.0-SNAPSHOT.jar"]
 ```
 
-docker-dockerhub
 Build the docker image for the spring boot project
-docker image build -t employee-jdbc .
+```
+docker image build -t spring-boot-docker-example .
+```
 
-spring boot mysql docker container image build
-Ad by Valueimpression
 Next run this as a container. Also we are running the container on the employee-mysql network.
-docker container run --network employee-mysql --name employee-jdbc-container -p 8080:8080 -d employee-jdbc
+docker container run --network employee-mysql --name employee-jdbc-container -p 8080:8080 -d spring-boot-docker-example
 
 spring boot mysql docker container image run
 ```
 docker container logs -f 34 
 ```
 
-spring boot mysql docker container image run logs
-Both our containers have started successfully. Let us insert data with POST request using curl-
-curl --header "Content-Type: application/json"   --request POST   --data '{"empId":"emp001","empName":"emp001"}'   http://localhost:8080/insertemployee
+![alt text](https://github.com/idmitrymolchanov/spring-boot-docker-example/blob/for_annotation/img/run_app.png "run_app")
 
-spring boot mysql docker container image run curl
-Finally if we go to localhost:8080/employees we get the inserted records.
-spring boot mysql docker container image run output
+Insert data with POST request using curl
+```
+curl --header "Content-Type: application/json"   --request POST   --data '{"empId":"emp001","empName":"emp001"}'   http://localhost:8080/insertemployee
+```
