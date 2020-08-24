@@ -14,8 +14,12 @@ import java.util.Map;
 @Repository
 public class EmployeeDaoImpl extends JdbcDaoSupport implements EmployeeDao {
 
+    final DataSource dataSource;
+
     @Autowired
-    DataSource dataSource;
+    public EmployeeDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @PostConstruct
     private void initialize() {
@@ -42,6 +46,5 @@ public class EmployeeDaoImpl extends JdbcDaoSupport implements EmployeeDao {
     public void insertEmployee(Employee employee) {
         String sql = "INSERT INTO employee " + "(empId, empName) VALUES (?, ?)";
         getJdbcTemplate().update(sql, new Object[] { employee.getEmpId(), employee.getEmpName() });
-
     }
 }

@@ -10,8 +10,12 @@ import java.util.List;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
+    final EmployeeDao employeeDao;
+
     @Autowired
-    EmployeeDao employeeDao;
+    public EmployeeServiceImpl(EmployeeDao employeeDao) {
+        this.employeeDao = employeeDao;
+    }
 
     public List<Employee> getAllEmployees() {
         List<Employee> employees = employeeDao.getAllEmployees();
