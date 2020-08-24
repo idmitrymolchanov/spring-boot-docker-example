@@ -1,27 +1,21 @@
 package org.example.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class Employee {
-    private String empId;
-    private String empName;
-
-    public String getEmpId() {
-        return empId;
-    }
-
-    public void setEmpId(String empId) {
-        this.empId = empId;
-    }
-
-    public String getEmpName() {
-        return empName;
-    }
-
-    public void setEmpName(String empName) {
-        this.empName = empName;
-    }
+    private String id;
+    private String firstName;
+    private String lastName;
+    private int age;
 
     @Override
     public String toString() {
-        return "Employee [empId=" + empId + ", empName=" + empName + "]";
+        return "Employee [id=" + id + ", firstName=" +
+                firstName + ", lastName = " + lastName + ", age = " + age + "]";
     }
 }
