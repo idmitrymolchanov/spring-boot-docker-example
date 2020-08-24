@@ -1,4 +1,6 @@
 CREATE TABLE IF NOT EXISTS employee (
-  empId VARCHAR(10) NOT NULL,
-  empName VARCHAR(100) NOT NULL
+  id VARCHAR(10) NOT NULL,
+  firstName VARCHAR(100) NOT NULL,
+  lastName VARCHAR(100) NOT NULL,
+  age INT
 );

@@ -34,8 +34,10 @@ public class EmployeeDaoImpl extends JdbcDaoSupport implements EmployeeDao {
         List<Employee> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             Employee emp = new Employee();
-            emp.setEmpId((String) row.get("empId"));
-            emp.setEmpName((String) row.get("empName"));
+            emp.setId((String) row.get("id"));
+            emp.setFirstName((String) row.get("firstName"));
+            emp.setLastName((String) row.get("lastName"));
+            emp.setAge((Integer) row.get("age"));
             result.add(emp);
         }
 
@@ -44,7 +46,12 @@ public class EmployeeDaoImpl extends JdbcDaoSupport implements EmployeeDao {
 
     @Override
     public void insertEmployee(Employee employee) {
-        String sql = "INSERT INTO employee " + "(empId, empName) VALUES (?, ?)";
-        getJdbcTemplate().update(sql, new Object[] { employee.getEmpId(), employee.getEmpName() });
+        String sql = "INSERT INTO employee " + "(id, firstName, lastName, age) VALUES (?,?,?,?)";
+        getJdbcTemplate().update(sql, new Object[] {
+                employee.getId(),
+                employee.getFirstName(),
+                employee.getLastName(),
+                employee.getAge()
+        });
     }
 }
